@@ -1,0 +1,93 @@
+#!/usr/bin/env python3
+"""Generate PNG favicons from an SVG source."""
+
+# Upstream: https://github.com/gi8lino/dev-tools
+# Version: __VERSION__
+
+import argparse
+import os
+from pathlib import Path
+import re
+import shutil
+import subprocess
+
+
+SIZE_PATTERN = re.compile(r"^([1-9][0-9]*)x([1-9][0-9]*)$")
+APPLE_TOUCH_SIZE = "180x180"
+
+
+def parse_size(value):
+    match = SIZE_PATTERN.fullmatch(value)
+    if match is None:
+        raise argparse.ArgumentTypeError("size must use WIDTHxHEIGHT with positive integers")
+    return value, int(match.group(1)), int(match.group(2))
+
+
+def resolve_converter(value):
+    converter = shutil.which(value)
+    if converter is None:
+        raise ValueError(
+            f"missing SVG converter: {value}; install librsvg or set "
+            "SVG_CONVERT=/path/to/rsvg-convert"
+        )
+    return converter
+
+
+def create_icon(converter, svg, icon_dir, size, outfile):
+    _, width, height = size
+    path = icon_dir / outfile
+    print(f"create {path}")
+    subprocess.run(
+        [
+            converter,
+            "--width", str(width),
+            "--height", str(height),
+            "--keep-aspect-ratio",
+            "--output", str(path),
+            str(svg),
+        ],
+        check=True,
+    )
+    if not path.is_file() or path.stat().st_size == 0:
+        raise RuntimeError(f"could not create icon: {path}")
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--version", action="version", version="favicon-generate __VERSION__")
+    parser.add_argument(
+        "--converter",
+        default=os.environ.get("SVG_CONVERT", "rsvg-convert"),
+        help="SVG converter executable, default: SVG_CONVERT or rsvg-convert",
+    )
+    parser.add_argument(
+        "--apple-touch",
+        action="store_true",
+        help="also create apple-touch-icon.png at 180x180",
+    )
+    parser.add_argument("svg", type=Path, help="source SVG file")
+    parser.add_argument("icon_dir", type=Path, help="output directory")
+    parser.add_argument("sizes", nargs="+", type=parse_size, metavar="SIZE", help="favicon size such as 32x32")
+    args = parser.parse_args()
+
+    try:
+        if not args.svg.is_file():
+            raise ValueError(f"missing icon SVG: {args.svg}")
+        converter = resolve_converter(args.converter)
+        args.icon_dir.mkdir(parents=True, exist_ok=True)
+        for size in args.sizes:
+            create_icon(converter, args.svg, args.icon_dir, size, f"favicon-{size[0]}.png")
+        if args.apple_touch:
+            create_icon(
+                converter,
+                args.svg,
+                args.icon_dir,
+                parse_size(APPLE_TOUCH_SIZE),
+                "apple-touch-icon.png",
+            )
+    except (OSError, ValueError, RuntimeError, subprocess.CalledProcessError) as error:
+        parser.exit(1, f"favicon-generate: {error}\n")
+
+
+if __name__ == "__main__":
+    main()

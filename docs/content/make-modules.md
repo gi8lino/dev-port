@@ -62,7 +62,6 @@ lint: $(GOLANGCI_LINT)
 	$(call run-tool,$(GOLANGCI_LINT),run)
 ```
 
-
 ### Installing GitHub release binaries
 
 `github-release-install` belongs to the core as well. It hides platform detection, release URL construction, versioned filenames, and symlink management from project Makefiles.
@@ -100,13 +99,13 @@ include $(call dev-tools-module,tag)
 
 The module provides all tagging targets and defaults `VERSION_PREFIX` to `v`.
 
-| Target | Behavior |
-| --- | --- |
+| Target         | Behavior                                                             |
+| -------------- | -------------------------------------------------------------------- |
 | `make current` | Print the latest semantic-version tag matching the configured prefix |
-| `make patch` | Create the next patch tag |
-| `make minor` | Create the next minor tag and reset patch to zero |
-| `make major` | Create the next major tag and reset minor and patch to zero |
-| `make push` | Push local tags to the configured Git remote |
+| `make patch`   | Create the next patch tag                                            |
+| `make minor`   | Create the next minor tag and reset patch to zero                    |
+| `make major`   | Create the next major tag and reset minor and patch to zero          |
+| `make push`    | Push local tags to the configured Git remote                         |
 
 Override the tag prefix in the Makefile:
 
@@ -174,8 +173,8 @@ include $(call dev-tools-module,help)
 
 It provides:
 
-| Target | Behavior |
-| --- | --- |
+| Target      | Behavior                                                            |
+| ----------- | ------------------------------------------------------------------- |
 | `make help` | Display all documented targets from the root and included Makefiles |
 
 Put this before the includes if help should be the default target:
@@ -198,14 +197,14 @@ test: ## Run all tests.
 
 The dev-tools repository itself uses the same modules and adds its own development/documentation targets:
 
-| Target | Behavior |
-| --- | --- |
-| `make current` | Show the current dev-tools semantic version |
-| `make patch` | Create the next patch release tag |
-| `make minor` | Create the next minor release tag |
-| `make major` | Create the next major release tag |
-| `make push` | Push local tags |
-| `make help` | Show generated Make help |
-| `make test` | Run the complete Python unit test suite |
-| `make site` | Build this documentation with Lore |
+| Target            | Behavior                                                                                                |
+| ----------------- | ------------------------------------------------------------------------------------------------------- |
+| `make current`    | Show the current dev-tools semantic version                                                             |
+| `make patch`      | Create the next patch release tag                                                                       |
+| `make minor`      | Create the next minor release tag                                                                       |
+| `make major`      | Create the next major release tag                                                                       |
+| `make push`       | Push local tags                                                                                         |
+| `make help`       | Show generated Make help                                                                                |
+| `make test`       | Run the complete Python unit test suite                                                                 |
+| `make site`       | Build this documentation with Lore                                                                      |
 | `make site-serve` | Build the documentation for localhost and serve it on the persistent `dev-port` assignment named `site` |

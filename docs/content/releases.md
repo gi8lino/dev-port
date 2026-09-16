@@ -11,6 +11,7 @@ dev-tag
 make-help
 go-install-tool
 github-release-install
+favicon-generate
 dev-tools.mk
 dev-tools-tag.mk
 dev-tools-port.mk
