@@ -1,8 +1,8 @@
 # Executable tools
 
-The release ships seven standalone executable helpers. Maintained source scripts live under `scripts/`; release assets use the short executable names shown here.
+The release ships eight standalone executable helpers. Maintained source scripts live under `scripts/`; release assets use the short executable names shown here.
 
-The Python tools require Python 3.8 or newer and use only the standard library. `favicon-generate` additionally invokes `rsvg-convert` from librsvg.
+The Python tools require Python 3.8 or newer and use only the standard library. `favicon-generate` and `svg-to-png` additionally invoke `rsvg-convert` from librsvg.
 
 ## dev-port
 
@@ -150,6 +150,49 @@ The asset template supports these placeholders:
 `--binary` selects the executable inside a tar archive. Omit it when the release asset is already the executable itself.
 
 The helper intentionally owns the versioned filename and symlink. Consuming Makefiles only declare the stable target, release tag, and asset pattern.
+
+## svg-to-png
+
+`svg-to-png` renders one SVG file to one PNG file with `rsvg-convert`. The caller chooses the output width, height, or both; the source aspect ratio is preserved.
+
+```sh
+./scripts/svg-to-png \
+  --width 1200 \
+  assets/kumbuka.svg \
+  build/kumbuka.png
+```
+
+Specify only a height when that is the controlling dimension, or provide both dimensions to fit the SVG within a bounding box:
+
+```sh
+./scripts/svg-to-png \
+  --width 512 \
+  --height 512 \
+  assets/kumbuka-mark.svg \
+  build/kumbuka-mark.png
+```
+
+At least one of `--width` or `--height` is required, and dimensions must be positive integers. Parent directories for the output file are created automatically.
+
+By default the tool runs `rsvg-convert`. Override it with `SVG_CONVERT` or `--converter` when librsvg is installed elsewhere:
+
+```sh
+SVG_CONVERT=/opt/homebrew/bin/rsvg-convert \
+  ./scripts/svg-to-png --width 1200 logo.svg logo.png
+```
+
+Projects can download it through the existing core helper without adding another Make module:
+
+```makefile
+SVG_TO_PNG := $(DEV_TOOLS_BIN)/svg-to-png
+
+$(SVG_TO_PNG): | $(DEV_TOOLS_BIN)
+	$(call download-dev-tool,svg-to-png,$@)
+
+.PHONY: logo-png
+logo-png: $(SVG_TO_PNG)
+	$(call run-tool,$(SVG_TO_PNG),--width 1200 assets/kumbuka.svg build/kumbuka.png)
+```
 
 ## favicon-generate
 

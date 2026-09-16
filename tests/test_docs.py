@@ -88,6 +88,19 @@ class DocumentationTests(unittest.TestCase):
         self.assertIn("scripts/favicon-generate", release)
         self.assertIn("dist/favicon-generate --version", release)
 
+    def test_svg_to_png_is_documented_and_released(self):
+        index = (self.content / "index.md").read_text()
+        tools = (self.content / "tools.md").read_text()
+        releases = (self.content / "releases.md").read_text()
+        release = (self.root / ".github" / "workflows" / "release.yml").read_text()
+
+        self.assertIn("`svg-to-png`", index)
+        self.assertIn("## svg-to-png", tools)
+        self.assertIn("SVG_CONVERT", tools)
+        self.assertIn("svg-to-png", releases)
+        self.assertIn("scripts/svg-to-png", release)
+        self.assertIn("dist/svg-to-png --version", release)
+
     def test_pages_uses_make_site_for_lore_download(self):
         workflow = (self.root / ".github" / "workflows" / "pages.yml").read_text()
 

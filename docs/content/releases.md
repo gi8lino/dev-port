@@ -12,6 +12,7 @@ make-help
 go-install-tool
 github-release-install
 favicon-generate
+svg-to-png
 dev-tools.mk
 dev-tools-tag.mk
 dev-tools-port.mk

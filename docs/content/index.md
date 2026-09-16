@@ -27,6 +27,7 @@ The releases also contain these directly runnable tools:
 - `go-install-tool`
 - `github-release-install`
 - `favicon-generate`
+- `svg-to-png`
 
 See [Executable tools](tools.md) for their command-line behavior and examples.
 

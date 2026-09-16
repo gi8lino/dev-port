@@ -31,6 +31,7 @@ jobs:
             scripts/go-install-tool \
             scripts/github-release-install \
             scripts/favicon-generate \
+            scripts/svg-to-png \
             make/dev-tools*.mk \
             dist/
 
@@ -59,7 +60,8 @@ jobs:
             dist/make-help \
             dist/go-install-tool \
             dist/github-release-install \
-            dist/favicon-generate
+            dist/favicon-generate \
+            dist/svg-to-png
 
       - name: Verify release assets
         run: |
@@ -74,6 +76,7 @@ jobs:
           test "$(dist/go-install-tool --version)" = "go-install-tool ${version}"
           test "$(dist/github-release-install --version)" = "github-release-install ${version}"
           test "$(dist/favicon-generate --version)" = "favicon-generate ${version}"
+          test "$(dist/svg-to-png --version)" = "svg-to-png ${version}"
 
           for makefile in dist/dev-tools*.mk; do
             grep -Fxq "# Version: ${version}" "$makefile"
@@ -96,6 +99,7 @@ jobs:
             go-install-tool \
             github-release-install \
             favicon-generate \
+            svg-to-png \
             dev-tools*.mk \
             > checksums.txt
 
@@ -111,6 +115,7 @@ jobs:
             dist/go-install-tool \
             dist/github-release-install \
             dist/favicon-generate \
+            dist/svg-to-png \
             dist/dev-tools*.mk \
             dist/checksums.txt \
             --generate-notes \

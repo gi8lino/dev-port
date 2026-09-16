@@ -1,0 +1,74 @@
+#!/usr/bin/env python3
+"""Render an SVG file to PNG."""
+
+# Upstream: https://github.com/gi8lino/dev-tools
+# Version: __VERSION__
+
+import argparse
+import os
+from pathlib import Path
+import shutil
+import subprocess
+
+
+def positive_int(value):
+    try:
+        number = int(value)
+    except ValueError as error:
+        raise argparse.ArgumentTypeError("dimension must be a positive integer") from error
+    if number <= 0:
+        raise argparse.ArgumentTypeError("dimension must be a positive integer")
+    return number
+
+
+def resolve_converter(value):
+    converter = shutil.which(value)
+    if converter is None:
+        raise ValueError(
+            f"missing SVG converter: {value}; install librsvg or set "
+            "SVG_CONVERT=/path/to/rsvg-convert"
+        )
+    return converter
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--version", action="version", version="svg-to-png __VERSION__")
+    parser.add_argument(
+        "--converter",
+        default=os.environ.get("SVG_CONVERT", "rsvg-convert"),
+        help="SVG converter executable, default: SVG_CONVERT or rsvg-convert",
+    )
+    parser.add_argument("--width", type=positive_int, help="maximum output width in pixels")
+    parser.add_argument("--height", type=positive_int, help="maximum output height in pixels")
+    parser.add_argument("svg", type=Path, help="source SVG file")
+    parser.add_argument("png", type=Path, help="output PNG file")
+    args = parser.parse_args()
+
+    try:
+        if args.width is None and args.height is None:
+            raise ValueError("set --width, --height, or both")
+        if not args.svg.is_file():
+            raise ValueError(f"missing SVG: {args.svg}")
+
+        converter = resolve_converter(args.converter)
+        args.png.parent.mkdir(parents=True, exist_ok=True)
+
+        command = [converter]
+        if args.width is not None:
+            command.extend(("--width", str(args.width)))
+        if args.height is not None:
+            command.extend(("--height", str(args.height)))
+        command.extend(("--keep-aspect-ratio", "--output", str(args.png), str(args.svg)))
+
+        print(f"create {args.png}")
+        subprocess.run(command, check=True)
+
+        if not args.png.is_file() or args.png.stat().st_size == 0:
+            raise RuntimeError(f"could not create PNG: {args.png}")
+    except (OSError, ValueError, RuntimeError, subprocess.CalledProcessError) as error:
+        parser.exit(1, f"svg-to-png: {error}\n")
+
+
+if __name__ == "__main__":
+    main()
